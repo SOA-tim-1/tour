@@ -4,7 +4,6 @@ import (
 	"database-example/dtos"
 	"database-example/service"
 	"encoding/json"
-	"log"
 	"net/http"
 	"strconv"
 
@@ -16,8 +15,14 @@ type CheckpointHandler struct {
 }
 
 func (handler *CheckpointHandler) Get(writer http.ResponseWriter, req *http.Request) {
-	id := mux.Vars(req)["id"]
-	log.Printf("Checkpoint sa id-em %s", id)
+	idStr := mux.Vars(req)["id"]
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		// Handle parsing error
+		http.Error(writer, "Invalid ID", http.StatusBadRequest)
+		return
+	}
+
 	checkpoint, err := handler.CheckpointService.FindCheckpoint(id)
 	writer.Header().Set("Content-Type", "application/json")
 	if err != nil {
@@ -38,7 +43,6 @@ func (handler *CheckpointHandler) GetByTourId(writer http.ResponseWriter, req *h
 		return
 	}
 
-	log.Printf("Checkpoints with tourId %d", id)
 	checkpoints, err := handler.CheckpointService.FindByTourId(id)
 	writer.Header().Set("Content-Type", "application/json")
 	if err != nil {
@@ -97,4 +101,24 @@ func (handler *CheckpointHandler) Create(writer http.ResponseWriter, req *http.R
 		writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+}
+
+func (handler *CheckpointHandler) Delete(writer http.ResponseWriter, req *http.Request) {
+	idStr := mux.Vars(req)["id"]
+	id, err := strconv.ParseInt(idStr, 10, 64)
+
+	if err != nil {
+		http.Error(writer, "Invalid ID", http.StatusBadRequest)
+		return
+	}
+
+	er := handler.CheckpointService.Delete(id)
+	writer.Header().Set("Content-Type", "application/json")
+	if er != nil {
+		writer.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	writer.WriteHeader(http.StatusNoContent)
+
 }

@@ -4,7 +4,6 @@ import (
 	"database-example/dtos"
 	"database-example/service"
 	"encoding/json"
-	"log"
 	"net/http"
 	"strconv"
 
@@ -24,7 +23,6 @@ func (handler *TourHandler) Get(writer http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	log.Printf("Tura sa id-em %d", id)
 	tour, err := handler.TourService.FindTour(id)
 	writer.Header().Set("Content-Type", "application/json")
 	if err != nil {
@@ -45,7 +43,6 @@ func (handler *TourHandler) GetByAuthorId(writer http.ResponseWriter, req *http.
 		return
 	}
 
-	log.Printf("Tura sa authorId-em %d", id)
 	tours, err := handler.TourService.FindByAuthorId(id)
 	writer.Header().Set("Content-Type", "application/json")
 	if err != nil {

@@ -10,7 +10,7 @@ type CheckpointRepository struct {
 	DatabaseConnection *gorm.DB
 }
 
-func (repo *CheckpointRepository) FindById(id string) (model.Checkpoint, error) {
+func (repo *CheckpointRepository) FindById(id int64) (model.Checkpoint, error) {
 	checkpoint := model.Checkpoint{}
 	dbResult := repo.DatabaseConnection.First(&checkpoint, "id = ?", id)
 	if dbResult != nil {
@@ -37,4 +37,20 @@ func (repo *CheckpointRepository) CreateCheckpoint(checkpoint *model.Checkpoint)
 	}
 	println("Rows affected: ", dbResult.RowsAffected)
 	return *checkpoint, nil
+}
+
+func (repo *CheckpointRepository) DeleteById(id int64) error {
+	checkpoint := model.Checkpoint{}
+
+	dbResult := repo.DatabaseConnection.First(&checkpoint, "id = ?", id)
+	if dbResult.Error != nil {
+		return dbResult.Error
+	}
+
+	dbResult = repo.DatabaseConnection.Delete(&checkpoint, id)
+	if dbResult.Error != nil {
+		return dbResult.Error
+	}
+
+	return nil
 }
