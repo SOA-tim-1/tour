@@ -5,7 +5,8 @@ import (
 )
 
 type ICheckpointService interface {
-	FindCheckpoint(id string) (*dtos.CheckpointDto, error)
+	FindCheckpoint(id int64) (*dtos.CheckpointDto, error)
 	FindByTourId(tourId int64) ([]*dtos.CheckpointDto, error)
 	Create(checkpointDto *dtos.CheckpointDto) (*dtos.CheckpointDto, error)
+	Delete(id int64) error
 }

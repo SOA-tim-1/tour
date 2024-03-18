@@ -22,7 +22,7 @@ func (repo *TourRepository) FindById(id int64) (model.Tour, error) {
 
 func (repo *TourRepository) FindByAuthorId(authorId int64) ([]model.Tour, error) {
 	tours := []model.Tour{}
-	dbResult := repo.DatabaseConnection.Preload("Checkpoints").Find(&tours, "author_id = ?", authorId)
+	dbResult := repo.DatabaseConnection.Preload("Checkpoints").Preload("Equipments").Find(&tours, "author_id = ?", authorId)
 	if dbResult.Error != nil {
 		return nil, dbResult.Error
 	}
@@ -33,9 +33,10 @@ func (repo *TourRepository) FindByAuthorId(authorId int64) ([]model.Tour, error)
 func (repo *TourRepository) CreateTour(tour *model.Tour) (model.Tour, error) {
 	// Attempt to find a tour with the same ID
 	existingTour := model.Tour{}
-	err := repo.DatabaseConnection.First(&existingTour, "id = ?", tour.ID).Error
+	err := repo.DatabaseConnection.Preload("Equipments").First(&existingTour, "id = ?", tour.ID).Error
 	if err == nil {
 		// Tour with the same ID found, update it
+		existingTour.Equipments = tour.Equipments
 		dbResult := repo.DatabaseConnection.Model(&existingTour).Updates(tour)
 		if dbResult.Error != nil {
 			return model.Tour{}, dbResult.Error

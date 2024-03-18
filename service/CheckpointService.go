@@ -13,22 +13,13 @@ type CheckpointService struct {
 	CheckpointRepo repo.ICheckpointRepository
 }
 
-func (service *CheckpointService) FindCheckpoint(id string) (*dtos.CheckpointDto, error) {
+func (service *CheckpointService) FindCheckpoint(id int64) (*dtos.CheckpointDto, error) {
 	checkpoint, err := service.CheckpointRepo.FindById(id)
 
 	if err != nil {
-		return nil, fmt.Errorf(fmt.Sprintf("menu item with id %s not found", id))
+		return nil, fmt.Errorf(fmt.Sprintf("menu item with id %d not found", id))
 	}
 
-	// checkpointDto := dtos.CheckpointDto{
-	// 	ID:          checkpoint.ID,
-	// 	Name:        checkpoint.Name,
-	// 	Description: checkpoint.Description,
-	// 	PictureURL:  checkpoint.PictureURL,
-	// 	Latitude:    checkpoint.Coordinate.Latitude,
-	// 	Longitude:   checkpoint.Coordinate.Longitude,
-	// 	TourId:      checkpoint.TourId,
-	// }
 	checkpointDto := dtos.CheckpointDto{}
 	automapper.Map(checkpoint, &checkpointDto, func(src *model.Checkpoint, dst *dtos.CheckpointDto) {
 		dst.Latitude = src.Coordinate.Latitude
@@ -45,18 +36,7 @@ func (service *CheckpointService) FindByTourId(tourId int64) ([]*dtos.Checkpoint
 	}
 
 	var checkpointDtos []*dtos.CheckpointDto
-	// for _, checkpoint := range checkpoints {
-	// 	checkpointDto := dtos.CheckpointDto{
-	// 		ID:          checkpoint.ID,
-	// 		Name:        checkpoint.Name,
-	// 		Description: checkpoint.Description,
-	// 		PictureURL:  checkpoint.PictureURL,
-	// 		Latitude:    checkpoint.Coordinate.Latitude,
-	// 		Longitude:   checkpoint.Coordinate.Longitude,
-	// 		TourId:      checkpoint.TourId,
-	// 	}
-	// 	checkpointDtos = append(checkpointDtos, &checkpointDto)
-	// }
+
 	for _, checkpoint := range checkpoints {
 		var checkpointDto dtos.CheckpointDto
 		automapper.Map(&checkpoint, &checkpointDto, func(src *model.Checkpoint, dst *dtos.CheckpointDto) {
@@ -71,22 +51,13 @@ func (service *CheckpointService) FindByTourId(tourId int64) ([]*dtos.Checkpoint
 
 func (service *CheckpointService) Create(checkpointDto *dtos.CheckpointDto) (*dtos.CheckpointDto, error) {
 
-	// checkpoint := model.Checkpoint{
-	// 	ID:          checkpointDto.ID,
-	// 	Name:        checkpointDto.Name,
-	// 	Description: checkpointDto.Description,
-	// 	PictureURL:  checkpointDto.PictureURL,
-	// 	Coordinate: model.Coordinate{
-	// 		Latitude:  checkpointDto.Latitude,
-	// 		Longitude: checkpointDto.Longitude,
-	// 	},
-	// 	TourId: checkpointDto.TourId,
-	// }
+	checkpoint := model.Checkpoint{}
+	automapper.Map(checkpointDto, &checkpoint)
 
-	var checkpoint model.Checkpoint
-	automapper.Map(checkpointDto, &checkpoint, func(src *dtos.CheckpointDto, dst *model.Checkpoint) {
-		dst.Coordinate = model.Coordinate{Latitude: src.Latitude, Longitude: src.Longitude}
-	})
+	checkpoint.Coordinate = model.Coordinate{
+		Latitude:  checkpointDto.Latitude,
+		Longitude: checkpointDto.Longitude,
+	}
 
 	checkpoint, err := service.CheckpointRepo.CreateCheckpoint(&checkpoint)
 	if err != nil {
@@ -95,10 +66,18 @@ func (service *CheckpointService) Create(checkpointDto *dtos.CheckpointDto) (*dt
 
 	checkpointDtoReturn := dtos.CheckpointDto{}
 
-	automapper.Map(checkpoint, &checkpointDtoReturn, func(src *model.Checkpoint, dst *dtos.CheckpointDto) {
-		dst.Latitude = src.Coordinate.Latitude
-		dst.Longitude = src.Coordinate.Longitude
-	})
+	automapper.Map(checkpoint, &checkpointDtoReturn)
+	checkpointDtoReturn.Latitude = checkpoint.Coordinate.Latitude
+	checkpointDtoReturn.Longitude = checkpoint.Coordinate.Longitude
 
 	return &checkpointDtoReturn, nil
+}
+
+func (service *CheckpointService) Delete(id int64) error {
+	err := service.CheckpointRepo.DeleteById(id)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

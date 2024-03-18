@@ -54,6 +54,7 @@ func startServer(
 	handler *handler.StudentHandler,
 	tourHandler *handler.TourHandler,
 	checkpointHandler *handler.CheckpointHandler,
+	equipmentHandler *handler.AuthorEquipmentHandler,
 ) {
 	router := mux.NewRouter().StrictSlash(true)
 
@@ -69,6 +70,9 @@ func startServer(
 	router.HandleFunc("/checkpoint/{id}", checkpointHandler.Get).Methods("GET")
 	router.HandleFunc("/checkpoint/tour/{tourId}", checkpointHandler.GetByTourId).Methods("GET")
 	router.HandleFunc("/checkpoint", checkpointHandler.Create).Methods("POST")
+	router.HandleFunc("/checkpoint/{id}", checkpointHandler.Delete).Methods("DELETE")
+
+	router.HandleFunc("/author/equipment", equipmentHandler.GetAll).Methods("GET")
 
 	router.PathPrefix("/").Handler(http.FileServer(http.Dir("./static")))
 	println("Server starting")
@@ -99,5 +103,9 @@ func main() {
 	checkpointService := &service.CheckpointService{CheckpointRepo: checkpointRepo}
 	checkpointHandler := &handler.CheckpointHandler{CheckpointService: checkpointService}
 
-	startServer(studentHandler, tourhandler, checkpointHandler)
+	equipmentRepo := &repo.AuthorEquipmentRepository{DatabaseConnection: database}
+	equipmentService := &service.AuthorEquipmentService{AuthorEquipmentRepo: equipmentRepo}
+	equipmentHandler := &handler.AuthorEquipmentHandler{AuthorEquipmentService: equipmentService}
+
+	startServer(studentHandler, tourhandler, checkpointHandler, equipmentHandler)
 }
