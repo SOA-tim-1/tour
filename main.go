@@ -17,7 +17,7 @@ import (
 
 func initDB() *gorm.DB {
 
-	dsn := "user=postgres password=super dbname=testGolang host=localhost port=5432 sslmode=disable"
+	dsn := "user=postgres password=super dbname=soa host=localhost port=5432 sslmode=disable"
 	database, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 
 	if err != nil {
@@ -30,6 +30,7 @@ func initDB() *gorm.DB {
 	database.AutoMigrate(&model.Checkpoint{})
 	database.AutoMigrate(&model.Tour{})
 	database.AutoMigrate(&model.Equipment{})
+	database.AutoMigrate(&model.Coupon{})
 
 	err = database.AutoMigrate(&model.Person{}, &model.Student{})
 	if err != nil {
@@ -55,7 +56,7 @@ func startServer(
 	tourHandler *handler.TourHandler,
 	checkpointHandler *handler.CheckpointHandler,
 	equipmentHandler *handler.AuthorEquipmentHandler,
-) {
+	couponHandler *handler.CouponHandler) {
 	router := mux.NewRouter().StrictSlash(true)
 
 	router.HandleFunc("/students/{id}", handler.Get).Methods("GET")
@@ -73,6 +74,8 @@ func startServer(
 	router.HandleFunc("/checkpoint/{id}", checkpointHandler.Delete).Methods("DELETE")
 
 	router.HandleFunc("/author/equipment", equipmentHandler.GetAll).Methods("GET")
+
+	router.HandleFunc("/coupon", couponHandler.CreateCoupon).Methods("POST")
 
 	router.PathPrefix("/").Handler(http.FileServer(http.Dir("./static")))
 	println("Server starting")
@@ -107,5 +110,9 @@ func main() {
 	equipmentService := &service.AuthorEquipmentService{AuthorEquipmentRepo: equipmentRepo}
 	equipmentHandler := &handler.AuthorEquipmentHandler{AuthorEquipmentService: equipmentService}
 
-	startServer(studentHandler, tourhandler, checkpointHandler, equipmentHandler)
+	couponRepo := &repo.CouponRepository{DatabaseConnection: database}
+	couponService := &service.CouponService{CouponRepo: couponRepo}
+	couponHandler := &handler.CouponHandler{CouponService: couponService}
+
+	startServer(studentHandler, tourhandler, checkpointHandler, equipmentHandler, couponHandler)
 }
