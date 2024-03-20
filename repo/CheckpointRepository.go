@@ -54,3 +54,17 @@ func (repo *CheckpointRepository) DeleteById(id int64) error {
 
 	return nil
 }
+
+func (repo *CheckpointRepository) CheckIfPointsAreValidForPublish(tourId int64) (bool, error) {
+	checkpoints := []model.Checkpoint{}
+
+	dbResult := repo.DatabaseConnection.Find(&checkpoints, "tour_id = ?", tourId)
+	if dbResult.Error != nil {
+		return false, dbResult.Error
+	}
+
+	if len(checkpoints) >= 2 {
+		return true, nil
+	}
+	return false, nil
+}
