@@ -4,36 +4,41 @@ import (
 	"database-example/dtos"
 	"database-example/service"
 	"encoding/json"
+	"fmt"
 	"net/http"
+	"strconv"
 )
 
 type CouponHandler struct {
 	CouponService *service.CouponService
 }
 
-// CreateCoupon handles the creation of a new coupon.
 func (h *CouponHandler) CreateCoupon(writer http.ResponseWriter, req *http.Request) {
-	var couponReq dtos.CouponRequest // Assuming you have a CouponRequest model
+	var couponReq dtos.CouponRequest
+
 	if err := json.NewDecoder(req.Body).Decode(&couponReq); err != nil {
 		http.Error(writer, "Error parsing request body", http.StatusBadRequest)
 		return
 	}
 
-	coupon := couponReq.ToCouponModel() // Assuming you have a method to convert CouponRequest to Coupon model
+	coupon := couponReq.ToCouponModel()
 	if err := h.CouponService.CreateCoupon(&coupon); err != nil {
 		http.Error(writer, "Error creating coupon", http.StatusInternalServerError)
 		return
 	}
 
 	writer.WriteHeader(http.StatusCreated)
-	json.NewEncoder(writer).Encode(coupon) // Sending back the created coupon
+	json.NewEncoder(writer).Encode(coupon)
 }
 
-// DeleteCoupon handles coupon deletion.
-/*func (h *CouponHandler) DeleteCoupon(writer http.ResponseWriter, req *http.Request) {
-	couponHash := mux.Vars(req)["couponHash"] // Assuming you're using the couponHash as a URL parameter
+func (h *CouponHandler) DeleteCoupon(writer http.ResponseWriter, req *http.Request) {
+	couponHash := req.URL.Query().Get("couponHash")
+	userId := req.URL.Query().Get("userId")
+	num, _ := strconv.Atoi(userId)
 
-	if err := h.CouponService.RemoveCouponByHash(couponHash); err != nil { // Assuming such a method exists
+	fmt.Print(couponHash + userId) // Adjusted for clarity in logging.
+
+	if err := h.CouponService.RemoveCoupon(couponHash, num); err != nil {
 		http.Error(writer, "Error deleting coupon", http.StatusInternalServerError)
 		return
 	}
@@ -41,7 +46,7 @@ func (h *CouponHandler) CreateCoupon(writer http.ResponseWriter, req *http.Reque
 	writer.WriteHeader(http.StatusOK)
 }
 
-// UpdateCoupon handles coupon updates.
+/*// UpdateCoupon handles coupon updates.
 func (h *CouponHandler) UpdateCoupon(writer http.ResponseWriter, req *http.Request) {
 	couponHash := mux.Vars(req)["couponHash"] // Assuming you're using the couponHash as a URL parameter
 
@@ -61,7 +66,7 @@ func (h *CouponHandler) UpdateCoupon(writer http.ResponseWriter, req *http.Reque
 
 	writer.WriteHeader(http.StatusOK)
 	json.NewEncoder(writer).Encode(coupon) // Sending back the updated coupon
-}*/
-
+}
+*/
 // Assuming there's a method to convert CouponRequest to Coupon model in your model definitions.
 // You might need to adjust model and method names based on your actual application structure.
