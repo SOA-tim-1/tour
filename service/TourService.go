@@ -60,6 +60,23 @@ func (service *TourService) Create(tourDto *dtos.TourDto) (*dtos.TourDto, error)
 	return &createdTourDto, nil
 }
 
+func (service *TourService) Update(tourDto *dtos.TourDto) (*dtos.TourDto, error) {
+	var tour model.Tour
+	automapper.Map(tourDto, &tour)
+	tour.Difficult = model.Difficult(tourDto.Difficult)
+
+	updatedTour, err := service.TourRepo.Update(&tour)
+	if err != nil {
+		return nil, err
+	}
+
+	// Map the created tour back to DTO
+	updatedTourDto := dtos.TourDto{}
+	automapper.Map(&updatedTour, &updatedTourDto)
+
+	return &updatedTourDto, nil
+}
+
 func (service *TourService) PublishTour(tourId int64) error {
 	err := service.TourRepo.PublishTour(tourId)
 	if err != nil {

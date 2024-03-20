@@ -81,3 +81,12 @@ func (service *CheckpointService) Delete(id int64) error {
 
 	return nil
 }
+
+func (service *CheckpointService) CheckIfPointsAreValidForPublish(tourId int64) (bool, error) {
+	publishable, err := service.CheckpointRepo.CheckIfPointsAreValidForPublish(tourId)
+	if err != nil {
+		return false, err
+	}
+
+	return publishable, nil
+}

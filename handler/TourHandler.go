@@ -11,7 +11,8 @@ import (
 )
 
 type TourHandler struct {
-	TourService service.ITourService
+	TourService       service.ITourService
+	CheckpointService service.ICheckpointService
 }
 
 func (handler *TourHandler) Get(writer http.ResponseWriter, req *http.Request) {
@@ -103,6 +104,39 @@ func (handler *TourHandler) Create(writer http.ResponseWriter, req *http.Request
 	}
 }
 
+func (handler *TourHandler) Update(writer http.ResponseWriter, req *http.Request) {
+	var tourDto dtos.TourDto
+	err := json.NewDecoder(req.Body).Decode(&tourDto)
+	if err != nil {
+		println("Error while parsing json")
+		writer.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	updatedTourDto, err := handler.TourService.Update(&tourDto)
+	if err != nil {
+		println("Error while creating a new tour")
+		writer.WriteHeader(http.StatusExpectationFailed)
+		return
+	}
+
+	tourJSON, err := json.Marshal(updatedTourDto)
+	if err != nil {
+		println("Error while encoding tourDto to JSON")
+		writer.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	writer.Header().Set("Content-Type", "application/json")
+	writer.WriteHeader(http.StatusCreated)
+	_, err = writer.Write(tourJSON)
+	if err != nil {
+		println("Error while writing JSON response")
+		writer.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+}
+
 func (handler *TourHandler) PublishTour(writer http.ResponseWriter, req *http.Request) {
 	var tourId int64
 	err := json.NewDecoder(req.Body).Decode(&tourId)
@@ -112,15 +146,24 @@ func (handler *TourHandler) PublishTour(writer http.ResponseWriter, req *http.Re
 		return
 	}
 
-	err = handler.TourService.PublishTour(tourId)
-
-	writer.Header().Set("Content-Type", "application/json")
+	publishable, err := handler.CheckpointService.CheckIfPointsAreValidForPublish(tourId)
 	if err != nil {
 		// Set response headers and write the JSON response
 		writer.WriteHeader(http.StatusBadRequest)
 	}
 
-	writer.WriteHeader(http.StatusOK)
+	writer.Header().Set("Content-Type", "application/json")
+	if publishable {
+		err = handler.TourService.PublishTour(tourId)
+		if err != nil {
+			writer.WriteHeader(http.StatusBadRequest)
+		}
+
+		writer.WriteHeader(http.StatusOK)
+	} else {
+		writer.WriteHeader(http.StatusConflict)
+	}
+
 }
 
 func (handler *TourHandler) ArchiveTour(writer http.ResponseWriter, req *http.Request) {

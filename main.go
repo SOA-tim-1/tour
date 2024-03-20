@@ -27,6 +27,7 @@ func initDB() *gorm.DB {
 
 	database.AutoMigrate(&model.Person{})
 	database.AutoMigrate(&model.Student{})
+	database.AutoMigrate(&model.TravelTimeAndMethod{})
 	database.AutoMigrate(&model.Checkpoint{})
 	database.AutoMigrate(&model.Tour{})
 	database.AutoMigrate(&model.Equipment{})
@@ -35,17 +36,6 @@ func initDB() *gorm.DB {
 	if err != nil {
 		log.Fatalf("Error migrating models: %v", err)
 	}
-
-	// newStudent := model.Student{
-	// 	Person:     model.Person{Firstname: "John", Lastname: "Doe"},
-	// 	Index:      "123456",
-	// 	Major:      "Computer Science",
-	// 	RandomData: model.RandomData{Years: 22},
-	// }
-
-	// // Kada upisemo studenta, GORM ce automatski prvo da kreira Osobu i upise u
-	// // tabelu, a zatim Studenta, i to ce uraditi unutar iste transakcije.
-	// database.Create(&newStudent)
 
 	return database
 }
@@ -64,6 +54,7 @@ func startServer(
 	router.HandleFunc("/tour/{id}", tourHandler.Get).Methods("GET")
 	router.HandleFunc("/tour/authortours/{authorId}", tourHandler.GetByAuthorId).Methods("GET")
 	router.HandleFunc("/tour", tourHandler.Create).Methods("POST")
+	router.HandleFunc("/tour/updatetour", tourHandler.Update).Methods("PUT")
 	router.HandleFunc("/tour/publish", tourHandler.PublishTour).Methods("PUT")
 	router.HandleFunc("/tour/archive", tourHandler.ArchiveTour).Methods("PUT")
 
@@ -95,13 +86,13 @@ func main() {
 	studentService := &service.StudentService{StudentRepo: studentRepo}
 	studentHandler := &handler.StudentHandler{StudentService: studentService}
 
-	tourRepo := &repo.TourRepository{DatabaseConnection: database}
-	tourService := &service.TourService{TourRepo: tourRepo}
-	tourhandler := &handler.TourHandler{TourService: tourService}
-
 	checkpointRepo := &repo.CheckpointRepository{DatabaseConnection: database}
 	checkpointService := &service.CheckpointService{CheckpointRepo: checkpointRepo}
 	checkpointHandler := &handler.CheckpointHandler{CheckpointService: checkpointService}
+
+	tourRepo := &repo.TourRepository{DatabaseConnection: database}
+	tourService := &service.TourService{TourRepo: tourRepo}
+	tourhandler := &handler.TourHandler{TourService: tourService, CheckpointService: checkpointService}
 
 	equipmentRepo := &repo.AuthorEquipmentRepository{DatabaseConnection: database}
 	equipmentService := &service.AuthorEquipmentService{AuthorEquipmentRepo: equipmentRepo}

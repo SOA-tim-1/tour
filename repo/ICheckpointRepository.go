@@ -7,4 +7,5 @@ type ICheckpointRepository interface {
 	FindByTourId(tourId int64) ([]model.Checkpoint, error)
 	CreateCheckpoint(checkpoint *model.Checkpoint) (model.Checkpoint, error)
 	DeleteById(id int64) error
+	CheckIfPointsAreValidForPublish(tourId int64) (bool, error)
 }
