@@ -79,6 +79,7 @@ func startServer(
 	router.HandleFunc("/coupon/delete-coupon", couponHandler.DeleteCoupon).Methods("DELETE")
 
 	router.PathPrefix("/").Handler(http.FileServer(http.Dir("./static")))
+
 	println("Server starting")
 	log.Fatal(http.ListenAndServe(":8090",
 		handlers.CORS(
