@@ -21,6 +21,7 @@ func (service *CouponService) FindCouponByHash(hash string) (*model.Coupon, erro
 
 func (service *CouponService) CreateCoupon(coupon *model.Coupon) error {
 	coupon.CouponHash = CreateRandomCouponHash()
+	fmt.Println("napraviohash")
 	err := service.CouponRepo.Create(coupon)
 	if err != nil {
 		return fmt.Errorf("failed to create coupon: %v", err)
@@ -28,7 +29,11 @@ func (service *CouponService) CreateCoupon(coupon *model.Coupon) error {
 	return nil
 }
 
-func (service *CouponService) RemoveCoupon(coupon *model.Coupon) error {
+func (service *CouponService) RemoveCoupon(hash string, userId int) error {
+	coupon, _ := service.FindCouponByHash(hash)
+	if coupon.CouponIssuerId != userId {
+		return fmt.Errorf("User not allowed")
+	}
 	err := service.CouponRepo.Remove(coupon)
 	if err != nil {
 		return fmt.Errorf("failed to delete coupon: %v", err)
