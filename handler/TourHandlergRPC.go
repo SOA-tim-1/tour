@@ -13,6 +13,7 @@ import (
 type TourHandlergRPC struct {
 	TourService       service.ITourService
 	CheckpointService service.ICheckpointService
+	tour.UnimplementedTourServiceServer
 }
 
 func (handler *TourHandlergRPC) FindTour(ctx context.Context, in *tour.FindTourRequest) (*tour.TourDto, error) {
