@@ -7,7 +7,6 @@ import (
 	"database-example/service"
 
 	"github.com/golang/protobuf/ptypes"
-	"google.golang.org/grpc"
 )
 
 type TourHandlergRPC struct {
@@ -74,7 +73,7 @@ func (handler *TourHandlergRPC) UpdateTour(ctx context.Context, in *tour.TourDto
 	return ConvertTourDtoToTourResponse(updatedTourDto), nil
 }
 
-func (handler *TourHandlergRPC) PublishTour(ctx context.Context, in *tour.PublishTourRequest, opts ...grpc.CallOption) (*tour.PublishTourResponse, error) {
+func (handler *TourHandlergRPC) PublishTour(ctx context.Context, in *tour.PublishTourRequest) (*tour.PublishTourResponse, error) {
 
 	publishable, err := handler.CheckpointService.CheckIfPointsAreValidForPublish(in.GetTourId())
 	if err != nil {

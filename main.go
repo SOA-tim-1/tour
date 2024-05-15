@@ -3,11 +3,21 @@ package main
 import (
 	"database-example/handler"
 	"database-example/model"
+	"database-example/proto/checkpoint"
+	"database-example/proto/coupon"
+	"database-example/proto/equipment"
+	"database-example/proto/tour"
 	"database-example/repo"
 	"database-example/service"
 	"log"
+	"net"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
 
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 	"gorm.io/driver/postgres"
 
 	"github.com/gorilla/handlers"
@@ -80,6 +90,49 @@ func startServer(
 		)(router)))
 }
 
+func startServerGRPC(
+	tourHandler *handler.TourHandlergRPC,
+	checkpointHandler *handler.CheckpointHandlergRPC,
+	equpmentHandler *handler.EquipmentHandlergRPC,
+	couponHandler *handler.CouponHandlergRPC,
+) {
+	listener, err := net.Listen("tcp", ":8092")
+	if err != nil {
+		log.Fatalln(err)
+	}
+	defer func(listener net.Listener) {
+		err := listener.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}(listener)
+
+	// Bootstrap gRPC server.
+	grpcServer := grpc.NewServer()
+	reflection.Register(grpcServer)
+
+	// Bootstrap gRPC service server and respond to request.
+	//userHandler := handlers.UserHandler{}
+	tour.RegisterTourServiceServer(grpcServer, tourHandler)
+	checkpoint.RegisterCheckpointServiceServer(grpcServer, checkpointHandler)
+	equipment.RegisterEquipmentServiceServer(grpcServer, equpmentHandler)
+	coupon.RegisterCouponServiceServer(grpcServer, couponHandler)
+
+	go func() {
+		if err := grpcServer.Serve(listener); err != nil {
+			log.Fatal("server error: ", err)
+		}
+	}()
+
+	stopCh := make(chan os.Signal)
+	signal.Notify(stopCh, syscall.SIGTERM)
+
+	<-stopCh
+
+	grpcServer.Stop()
+
+}
+
 func main() {
 	database := initDB()
 	if database == nil {
@@ -89,23 +142,32 @@ func main() {
 
 	studentRepo := &repo.StudentRepository{DatabaseConnection: database}
 	studentService := &service.StudentService{StudentRepo: studentRepo}
-	studentHandler := &handler.StudentHandler{StudentService: studentService}
 
 	checkpointRepo := &repo.CheckpointRepository{DatabaseConnection: database}
 	checkpointService := &service.CheckpointService{CheckpointRepo: checkpointRepo}
-	checkpointHandler := &handler.CheckpointHandler{CheckpointService: checkpointService}
 
 	tourRepo := &repo.TourRepository{DatabaseConnection: database}
 	tourService := &service.TourService{TourRepo: tourRepo}
-	tourhandler := &handler.TourHandler{TourService: tourService, CheckpointService: checkpointService}
 
 	equipmentRepo := &repo.AuthorEquipmentRepository{DatabaseConnection: database}
 	equipmentService := &service.AuthorEquipmentService{AuthorEquipmentRepo: equipmentRepo}
-	equipmentHandler := &handler.AuthorEquipmentHandler{AuthorEquipmentService: equipmentService}
 
 	couponRepo := &repo.CouponRepository{DatabaseConnection: database}
 	couponService := &service.CouponService{CouponRepo: couponRepo}
+
+	studentHandler := &handler.StudentHandler{StudentService: studentService}
+	checkpointHandler := &handler.CheckpointHandler{CheckpointService: checkpointService}
+	tourHandler := &handler.TourHandler{TourService: tourService, CheckpointService: checkpointService}
+	equipmentHandler := &handler.AuthorEquipmentHandler{AuthorEquipmentService: equipmentService}
 	couponHandler := &handler.CouponHandler{CouponService: couponService}
 
-	startServer(studentHandler, tourhandler, checkpointHandler, equipmentHandler, couponHandler)
+	startServer(studentHandler, tourHandler, checkpointHandler, equipmentHandler, couponHandler)
+
+	// tourHandlerGRPC := &handler.TourHandlergRPC{TourService: tourService, CheckpointService: checkpointService}
+	// checkpointHandlerGRPC := &handler.CheckpointHandlergRPC{CheckpointService: checkpointService}
+	// equipmentHandlerGRPC := &handler.EquipmentHandlergRPC{AuthorEquipmentService: equipmentService}
+	// couponHandlerGRPC := &handler.CouponHandlergRPC{CouponService: couponService}
+
+	// startServerGRPC(tourHandlerGRPC, checkpointHandlerGRPC, equipmentHandlerGRPC, couponHandlerGRPC)
+
 }
