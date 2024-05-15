@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+option go_package = "proto/checkpoint";
+
+message CheckpointDto {
+    int64 id = 1;
+    string name = 2;
+    string description = 3;
+    string picture_url = 4;
+    double latitude = 5;
+    double longitude = 6;
+    int64 tour_id = 7;
+  }
+  
+  service CheckpointService {
+    rpc FindCheckpoint(FindCheckpointRequest) returns (CheckpointDto) {}
+    rpc FindCheckpointByTourId(FindByTourIdRequest) returns (FindByTourIdResponse) {}
+    rpc CreateCheckpoint(CheckpointDto) returns (CheckpointDto) {}
+    rpc DeleteCheckpoint(DeleteRequest) returns (DeleteResponse) {}
+  }
+  
+  message FindCheckpointRequest {
+    int64 id = 1;
+  }
+  
+  message FindByTourIdRequest {
+    int64 tour_id = 1;
+  }
+  
+  message FindByTourIdResponse {
+    repeated CheckpointDto checkpoints = 1;
+  }
+  
+  
+  message DeleteRequest {
+    int64 id = 1;
+  }
+  
+  message DeleteResponse {}

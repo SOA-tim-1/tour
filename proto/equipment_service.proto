@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+option go_package = "proto/equipment";
+
+message EquipmentDto {
+    int64 id = 1;
+    string name = 2;
+    string description = 3;
+  }
+  
+  service EquipmentService {
+    rpc FindAllEquipments(FindAllRequest) returns (FindAllResponse) {}
+  }
+  
+  message FindAllRequest {}
+  
+  message FindAllResponse {
+    repeated EquipmentDto equipments = 1;
+  }
