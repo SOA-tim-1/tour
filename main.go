@@ -96,7 +96,7 @@ func startServerGRPC(
 	equpmentHandler *handler.EquipmentHandlergRPC,
 	couponHandler *handler.CouponHandlergRPC,
 ) {
-	listener, err := net.Listen("tcp", ":8092")
+	listener, err := net.Listen("tcp", ":8090")
 	if err != nil {
 		log.Fatalln(err)
 	}
