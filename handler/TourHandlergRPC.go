@@ -105,9 +105,9 @@ func (handler *TourHandlergRPC) ArchiveTour(ctx context.Context, in *tour.Archiv
 
 func ConvertTourDtoToTourResponse(tourDto *dtos.TourDto) *tour.TourDto {
 
-	var tourCheckpoints []*tour.CheckpointDto
+	var tourCheckpoints []*tour.CheckpointDtoTour
 	for _, dto := range tourDto.Checkpoints {
-		checkpoint := &tour.CheckpointDto{
+		checkpoint := &tour.CheckpointDtoTour{
 			Id:          dto.ID,
 			Name:        dto.Name,
 			Description: dto.Description,
@@ -119,9 +119,9 @@ func ConvertTourDtoToTourResponse(tourDto *dtos.TourDto) *tour.TourDto {
 		tourCheckpoints = append(tourCheckpoints, checkpoint)
 	}
 
-	var tourEquipments []*tour.EquipmentDto
+	var tourEquipments []*tour.EquipmentDtoTour
 	for _, dto := range tourDto.Equipments {
-		equipment := &tour.EquipmentDto{
+		equipment := &tour.EquipmentDtoTour{
 			Id:          dto.ID,
 			Name:        dto.Name,
 			Description: dto.Description,

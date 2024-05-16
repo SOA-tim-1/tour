@@ -140,9 +140,6 @@ func main() {
 		return
 	}
 
-	studentRepo := &repo.StudentRepository{DatabaseConnection: database}
-	studentService := &service.StudentService{StudentRepo: studentRepo}
-
 	checkpointRepo := &repo.CheckpointRepository{DatabaseConnection: database}
 	checkpointService := &service.CheckpointService{CheckpointRepo: checkpointRepo}
 
@@ -155,19 +152,21 @@ func main() {
 	couponRepo := &repo.CouponRepository{DatabaseConnection: database}
 	couponService := &service.CouponService{CouponRepo: couponRepo}
 
-	studentHandler := &handler.StudentHandler{StudentService: studentService}
-	checkpointHandler := &handler.CheckpointHandler{CheckpointService: checkpointService}
-	tourHandler := &handler.TourHandler{TourService: tourService, CheckpointService: checkpointService}
-	equipmentHandler := &handler.AuthorEquipmentHandler{AuthorEquipmentService: equipmentService}
-	couponHandler := &handler.CouponHandler{CouponService: couponService}
+	//studentRepo := &repo.StudentRepository{DatabaseConnection: database}
+	//studentService := &service.StudentService{StudentRepo: studentRepo}
+	// studentHandler := &handler.StudentHandler{StudentService: studentService}
+	// checkpointHandler := &handler.CheckpointHandler{CheckpointService: checkpointService}
+	// tourHandler := &handler.TourHandler{TourService: tourService, CheckpointService: checkpointService}
+	// equipmentHandler := &handler.AuthorEquipmentHandler{AuthorEquipmentService: equipmentService}
+	// couponHandler := &handler.CouponHandler{CouponService: couponService}
 
-	startServer(studentHandler, tourHandler, checkpointHandler, equipmentHandler, couponHandler)
+	// startServer(studentHandler, tourHandler, checkpointHandler, equipmentHandler, couponHandler)
 
-	// tourHandlerGRPC := &handler.TourHandlergRPC{TourService: tourService, CheckpointService: checkpointService}
-	// checkpointHandlerGRPC := &handler.CheckpointHandlergRPC{CheckpointService: checkpointService}
-	// equipmentHandlerGRPC := &handler.EquipmentHandlergRPC{AuthorEquipmentService: equipmentService}
-	// couponHandlerGRPC := &handler.CouponHandlergRPC{CouponService: couponService}
+	tourHandlerGRPC := &handler.TourHandlergRPC{TourService: tourService, CheckpointService: checkpointService}
+	checkpointHandlerGRPC := &handler.CheckpointHandlergRPC{CheckpointService: checkpointService}
+	equipmentHandlerGRPC := &handler.EquipmentHandlergRPC{AuthorEquipmentService: equipmentService}
+	couponHandlerGRPC := &handler.CouponHandlergRPC{CouponService: couponService}
 
-	// startServerGRPC(tourHandlerGRPC, checkpointHandlerGRPC, equipmentHandlerGRPC, couponHandlerGRPC)
+	startServerGRPC(tourHandlerGRPC, checkpointHandlerGRPC, equipmentHandlerGRPC, couponHandlerGRPC)
 
 }

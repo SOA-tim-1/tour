@@ -32,14 +32,14 @@ message TourDto {
   float price = 7;
   string tags = 8;
   float distance = 9;
-  repeated CheckpointDto checkpoints = 10;
+  repeated CheckpointDtoTour checkpoints = 10;
   google.protobuf.Timestamp publish_time = 11;
   google.protobuf.Timestamp archive_time = 12;
-  repeated EquipmentDto equipments = 13;
+  repeated EquipmentDtoTour equipments = 13;
   repeated TravelTimeAndMethodDto travel_time_and_method = 14;
 }
 
-message CheckpointDto {
+message CheckpointDtoTour {
   int64 id = 1;
   string name = 2;
   string description = 3;
@@ -49,7 +49,7 @@ message CheckpointDto {
   int64 tour_id = 7;
 }
 
-message EquipmentDto {
+message EquipmentDtoTour {
   int64 id = 1;
   string name = 2;
   string description = 3;
