@@ -7,6 +7,7 @@ import (
 	"database-example/service"
 
 	"github.com/golang/protobuf/ptypes"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type TourHandlergRPC struct {
@@ -138,10 +139,18 @@ func ConvertTourDtoToTourResponse(tourDto *dtos.TourDto) *tour.TourDto {
 		tourTravelTimeAndMethod = append(tourTravelTimeAndMethod, travelTimeAndMethod)
 	}
 
-	publishTime, _ := ptypes.TimestampProto(*tourDto.PublishTime)
+	publishTime := timestamppb.Now()
+	publishTime = nil
 
-	// Similarly, convert tourDto.ArchiveTime to google.protobuf.Timestamp
-	archiveTime, _ := ptypes.TimestampProto(*tourDto.ArchiveTime)
+	if tourDto.PublishTime != nil {
+		publishTime, _ = ptypes.TimestampProto(*tourDto.PublishTime)
+	}
+
+	archiveTime := timestamppb.Now()
+	archiveTime = nil
+	if tourDto.ArchiveTime != nil {
+		archiveTime, _ = ptypes.TimestampProto(*tourDto.ArchiveTime)
+	}
 
 	tourResponse := &tour.TourDto{
 		Id:                  tourDto.ID,
