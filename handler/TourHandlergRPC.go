@@ -53,6 +53,8 @@ func (handler *TourHandlergRPC) FindTourByAuthorId(ctx context.Context, in *tour
 func (handler *TourHandlergRPC) CreateTour(ctx context.Context, in *tour.TourDto) (*tour.TourDto, error) {
 
 	tourDto := ConvertTourResponseToTourDto(in)
+	tourDto.ArchiveTime = nil
+	tourDto.PublishTime = nil
 
 	createdTourDto, err := handler.TourService.Create(tourDto)
 	if err != nil {
@@ -65,6 +67,8 @@ func (handler *TourHandlergRPC) CreateTour(ctx context.Context, in *tour.TourDto
 func (handler *TourHandlergRPC) UpdateTour(ctx context.Context, in *tour.TourDto) (*tour.TourDto, error) {
 
 	tourDto := ConvertTourResponseToTourDto(in)
+	tourDto.ArchiveTime = nil
+	tourDto.PublishTime = nil
 
 	updatedTourDto, err := handler.TourService.Update(tourDto)
 	if err != nil {

@@ -27,7 +27,7 @@ import (
 
 func initDB() *gorm.DB {
 
-	dsn := "user=postgres password=super dbname=soa host=tourDatabase port=5432 sslmode=disable"
+	dsn := "user=postgres password=super dbname=soa host=localhost port=5432 sslmode=disable"
 	database, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 
 	if err != nil {
@@ -122,6 +122,7 @@ func startServerGRPC(
 		if err := grpcServer.Serve(listener); err != nil {
 			log.Fatal("server error: ", err)
 		}
+		println("Server starting")
 	}()
 
 	stopCh := make(chan os.Signal)
